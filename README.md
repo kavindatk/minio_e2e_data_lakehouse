@@ -199,6 +199,14 @@ hadoop@node02:~$
 <br/><br/>
 
 once you created a bucket vis using web or terminal , it will be apper in the ```/mnt/data``` directory
+<br/><br/>
+### 💡 Important Note – Using HAProxy with MINIO
+
+The most important part here is that I used HAProxy to access the MINIO cluster through a single interface.
+In this setup, HAProxy handles the routing and directs requests to the available MINIO web UI automatically.
+
+Below are some useful commands and the HAProxy configuration, which will help you understand how this setup works.
+
 
 <br/>
 
