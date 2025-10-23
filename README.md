@@ -6,6 +6,9 @@
 <picture>
   <img alt="docker" src="https://github.com/kavindatk/minio_e2e_data_lakehouse/blob/main/images/minio_logo.JPG" width="" height="125">
 </picture>
+<picture>
+  <img alt="docker" src="https://github.com/kavindatk/minio_e2e_data_lakehouse/blob/main/images/apache%20hive.JPG" width="" height="125">
+</picture>  
 </p>
 
 ### 🧩 Pre-Configuration Setup
@@ -50,6 +53,12 @@ hadoop@node01:~$
 <br/>
 
 ## ⚙️ Step 01 – Set up the MinIO Cluster
+
+<p align="center">
+<picture>
+  <img alt="docker" src="https://github.com/kavindatk/minio_e2e_data_lakehouse/blob/main/images/minio_logo.JPG" width="" height="125">
+</picture> 
+</p>
 
 In this step, I will show how to set up a MINIO cluster using Docker.
 For this setup, I’m using the Docker network in host mode.
@@ -231,6 +240,12 @@ mc cp dataset.csv myminio/databucket/elec_cars
 ## 🧩 Step 02 – Set up the Hive Metastore
 ## 🧩 Step 03 – Set up Hive Beeline
 
+<p align="center">
+<picture>
+  <img alt="docker" src="https://github.com/kavindatk/minio_e2e_data_lakehouse/blob/main/images/apache%20hive.JPG" width="" height="125">
+</picture>  
+</p>
+
 For Step 2 and Step 3, I’m planning to use <b>Docker Compose.</b>
 At the moment, I don’t have a Docker cluster — instead, I have <b>four separate VMs with Docker installed</b>.
 Because of that, I can’t deploy MINIO using Docker Compose.
@@ -240,6 +255,73 @@ Among these, the most important component is the <b>Hive Metastore</b>, since it
 <b>Beeline</b> is only needed for testing and running Hive SQL commands.
 
 The following steps show how to set up <b>Hive Metastore and Hive Beeline</b>.   
+<br>
+### 🧩 Required Files Before Proceeding
+<br/>
+Before proceeding, we need the following files.
+In this setup, I’m using Hive 4.0.0, and the files listed below are compatible with this version:
+<br/><br/>
+1. <b>hive-site.xml</b> – Hive configuration file<br/>
+2. <b>core-site.xml</b> – Hadoop core configuration file (used by Hive)<br/>
+3. <b>postgresql-42.7.3.jar</b> – Required for connecting Hive to PostgreSQL via JDBC<br/>
+4. <b>hadoop-aws-3.3.4.jar</b> – Required for connecting Hive to MinIO<br/>
+5. <b>aws-java-sdk-bundle-1.12.367.jar</b> – Required for connecting Hive to MinIO<br/>
+<br/>
+The <b>Hive 4.0.0 Docker image</b> already includes a basic Hadoop setup with the necessary libraries,
+so I haven’t made any changes to the Hadoop configuration since it’s not part of my current requirement.
+<br/>
+I’ve uploaded the fully completed <b>XML and Docker Compose</b> files to my repository —
+you can review them and adjust the configurations as needed.<br/>
+Below, I’ll show only the <b>required commands</b> to run the setup.<br/>
+
+```bash
+# Folder structure
+
+/opt/hive
+├── conf
+│   ├── core-site.xml
+│   └── hive-site.xml
+├── docker-compose.yml
+├── hive_home
+└── jars
+    ├── aws-java-sdk-bundle-1.12.367.jar
+    ├── hadoop-aws-3.3.4.jar
+    └── postgresql-42.7.3.jar
+
+```
+
+```bash
+# Start Docker container using Docker Compose
+
+hadoop@node01:/opt/hive$
+hadoop@node01:/opt/hive$ docker compose up -d
+WARN[0000] /opt/hive/docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion
+[+] Running 5/5
+ ✔ Network hive_minio_net       Created                                                                                                                0.1s
+ ✔ Volume "hive_postgres_data"  Created                                                                                                                0.0s
+ ✔ Container postgres_hive      Healthy                                                                                                               10.8s
+ ✔ Container hive_server2       Started                                                                                                               11.1s
+ ✔ Container hive_metastore     Started                                                                                                               11.0s
+hadoop@node01:/opt/hive$
+hadoop@node01:/opt/hive$
+
+# Checking Dokcer status
+
+hadoop@node01:/opt/hive$
+hadoop@node01:/opt/hive$
+hadoop@node01:/opt/hive$ docker ps
+CONTAINER ID   IMAGE                COMMAND                  CREATED          STATUS                            PORTS                                                                                                        NAMES
+cb46549aca57   apache/hive:4.0.0    "sh -c /entrypoint.sh"   16 seconds ago   Up 5 seconds (health: starting)   0.0.0.0:10000->10000/tcp, [::]:10000->10000/tcp, 9083/tcp, 0.0.0.0:10002->10002/tcp, [::]:10002->10002/tcp   hive_server2
+2fffdcea04e9   apache/hive:4.0.0    "sh -c /entrypoint.sh"   16 seconds ago   Up 5 seconds (health: starting)   10000/tcp, 0.0.0.0:9083->9083/tcp, [::]:9083->9083/tcp, 10002/tcp                                            hive_metastore
+3f45b80d4a72   postgres:13          "docker-entrypoint.s…"   16 seconds ago   Up 16 seconds (healthy)           0.0.0.0:5432->5432/tcp, [::]:5432->5432/tcp                                                                  postgres_hive
+2b5f7b746ca1   minio/minio:latest   "/usr/bin/docker-ent…"   11 hours ago     Up 11 hours                                                                                                                                    minio_storage
+hadoop@node01:/opt/hive$
+
+```
+
+<br/><br/>
 
 
 ## ⚙️ Step 04 – Testing Phase
+
+
