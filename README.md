@@ -207,13 +207,39 @@ In this setup, HAProxy handles the routing and directs requests to the available
 
 Below are some useful commands and the HAProxy configuration, which will help you understand how this setup works.
 
+```bash
+# Create alias for MINIO connection
+mc alias set <alias name> http://<minio ip>:9000 <user> <password>
+mc alias set myminio http://minio:9000 minioadmin minioadmin
+
+# Create MINIO (S3) bucket 
+mc mb <alias name>/<bucket name>
+mc mb myminio/warehouse
+
+# Enable buckt to public access (This need for our Hive setup)
+mc anonymous set public <alias name>/<bucket name>
+mc anonymous set public myminio/warehouse
+
+# Upload files to bucket
+mc cp <local file> <alias name>/<bucket>/<folder (optional)>
+mc cp dataset.csv myminio/databucket/elec_cars
+```
+
 
 <br/>
 
-2. Set up the Hive Metastore
+## 🧩 Step 02 – Set up the Hive Metastore
+## 🧩 Step 03 – Set up Hive Beeline
+
+For Step 2 and Step 3, I’m planning to use <b>Docker Compose.</b>
+At the moment, I don’t have a Docker cluster — instead, I have <b>four separate VMs with Docker installed</b>.
+Because of that, I can’t deploy MINIO using Docker Compose.
+
+Also, my <b>Hive Metastore and Hive Beeline</b> will both run on <b>VM 1</b>.
+Among these, the most important component is the <b>Hive Metastore</b>, since it will be used later by <b>Iceberg, Trino/Presto, and Hue.</b>
+<b>Beeline</b> is only needed for testing and running Hive SQL commands.
+
+The following steps show how to set up <b>Hive Metastore and Hive Beeline</b>.   
 
 
-3. Set up Hive Beeline
-
-
-4. Testing Phase
+## ⚙️ Step 04 – Testing Phase
