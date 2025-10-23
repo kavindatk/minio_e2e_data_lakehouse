@@ -647,11 +647,11 @@ Total MapReduce CPU Time Spent: 670 msec
 <br/><br/>
 
 <picture>
-  <img alt="docker" src="https://github.com/kavindatk/minio_e2e_data_lakehouse/blob/main/images/minio%20web3.JPG" width="600" height="400">
+  <img alt="docker" src="https://github.com/kavindatk/minio_e2e_data_lakehouse/blob/main/images/minio%20web3.JPG" width="" height="">
 </picture>
 
 <picture>
-  <img alt="docker" src="https://github.com/kavindatk/minio_e2e_data_lakehouse/blob/main/images/minio%20web4.JPG" width="600" height="400">
+  <img alt="docker" src="https://github.com/kavindatk/minio_e2e_data_lakehouse/blob/main/images/minio%20web4.JPG" width="" height="">
 </picture>
 
 <br/><br/>
