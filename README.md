@@ -644,3 +644,86 @@ Total MapReduce CPU Time Spent: 670 msec
 0: jdbc:hive2:///>
 
 ```
+<br/><br/>
+
+```bash
+# I have created carsinfobucket S3 bucket and upload CSV file
+
+hadoop@node01:/opt/hive_config$
+hadoop@node01:/opt/hive_config$ mc mb myminio/carsinfobucket
+Bucket created successfully `myminio/carsinfobucket`.
+hadoop@node01:/opt/hive_config$ mc cp dataset.csv myminio/carsinfobucket/cars_details/
+.../hive_config/dataset.csv: 61.31 MiB / 61.31 MiB ┃▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓┃ 62.67 MiB/s 0shadoop@node01:/opt/hive_config$
+hadoop@node01:/opt/hive_config$ mc ls  myminio/carsinfobucket/cars_details
+[2025-10-23 06:57:27 UTC]  61MiB STANDARD cars_details
+hadoop@node01:/opt/hive_config$
+hadoop@node01:/opt/hive_config$
+
+
+# Now , Lets create some table and load external data
+
+0: jdbc:hive2:///>
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> CREATE EXTERNAL TABLE IF NOT EXISTS cars_info_bucket_data (
+. . . . . . . . .>   VIN STRING,
+. . . . . . . . .>   County STRING,
+. . . . . . . . .>   City STRING,
+. . . . . . . . .>   State STRING,
+. . . . . . . . .>   Postal_Code STRING,
+. . . . . . . . .>   Model_Year INT,
+. . . . . . . . .>   Make STRING,
+. . . . . . . . .>   Model STRING,
+. . . . . . . . .>   Electric_Vehicle_Type STRING,
+. . . . . . . . .>   CAFV_Eligibility STRING,
+. . . . . . . . .>   Electric_Range INT,
+. . . . . . . . .>   Base_MSRP INT,
+. . . . . . . . .>   Legislative_District STRING,
+. . . . . . . . .>   DOL_Vehicle_ID STRING,
+. . . . . . . . .>   Vehicle_Location STRING,
+. . . . . . . . .>   Electric_Utility STRING,
+. . . . . . . . .>   Census_Tract STRING
+. . . . . . . . .> )
+. . . . . . . . .> ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.OpenCSVSerde'
+. . . . . . . . .> WITH SERDEPROPERTIES (
+. . . . . . . . .>   "separatorChar" = ",",
+. . . . . . . . .>   "quoteChar"     = "\"",
+. . . . . . . . .>   "escapeChar"    = "\\"
+. . . . . . . . .> )
+. . . . . . . . .> STORED AS TEXTFILE
+. . . . . . . . .> LOCATION 's3a://carsinfobucket/cars_details/'
+. . . . . . . . .> TBLPROPERTIES ("skip.header.line.count"="1");
+No rows affected (0.171 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> show tables;
++------------------------+
+|        tab_name        |
++------------------------+
+| cars_external_table    |
+| cars_info_bucket_data  |
+| cars_managed_table     |
++------------------------+
+3 rows selected (0.031 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> select * from cars_info_bucket_data limit 10;
+25/10/23 07:09:20 [710da8d9-92dd-4a05-82b4-4b31a101dce4 main]: WARN calcite.RelOptHiveTable: No Stats for minio_test@cars_info_bucket_data, Columns: legislative_district, electric_utility, city, county, model_year, vehicle_location, base_msrp, electric_vehicle_type, vin, model, dol_vehicle_id, state, postal_code, cafv_eligibility, make, census_tract, electric_range
+No Stats for minio_test@cars_info_bucket_data, Columns: legislative_district, electric_utility, city, county, model_year, vehicle_location, base_msrp, electric_vehicle_type, vin, model, dol_vehicle_id, state, postal_code, cafv_eligibility, make, census_tract, electric_range
+25/10/23 07:09:20 [710da8d9-92dd-4a05-82b4-4b31a101dce4 main]: WARN optimizer.SimpleFetchOptimizer: Table minio_test@cars_info_bucket_data is external table, falling back to filesystem scan.
++----------------------------+-------------------------------+-----------------------------+------------------------------+------------------------------------+-----------------------------------+-----------------------------+------------------------------+----------------------------------------------+----------------------------------------------------+---------------------------------------+----------------------------------+---------------------------------------------+---------------------------------------+-----------------------------------------+------------------------------------------------+-------------------------------------+
+| cars_info_bucket_data.vin  | cars_info_bucket_data.county  | cars_info_bucket_data.city  | cars_info_bucket_data.state  | cars_info_bucket_data.postal_code  | cars_info_bucket_data.model_year  | cars_info_bucket_data.make  | cars_info_bucket_data.model  | cars_info_bucket_data.electric_vehicle_type  |       cars_info_bucket_data.cafv_eligibility       | cars_info_bucket_data.electric_range  | cars_info_bucket_data.base_msrp  | cars_info_bucket_data.legislative_district  | cars_info_bucket_data.dol_vehicle_id  | cars_info_bucket_data.vehicle_location  |     cars_info_bucket_data.electric_utility     | cars_info_bucket_data.census_tract  |
++----------------------------+-------------------------------+-----------------------------+------------------------------+------------------------------------+-----------------------------------+-----------------------------+------------------------------+----------------------------------------------+----------------------------------------------------+---------------------------------------+----------------------------------+---------------------------------------------+---------------------------------------+-----------------------------------------+------------------------------------------------+-------------------------------------+
+| WA1E2AFY8R                 | Thurston                      | Olympia                     | WA                           | 98512                              | 2024                              | AUDI                        | Q5 E                         | Plug-in Hybrid Electric Vehicle (PHEV)       | Not eligible due to low battery range              | 23                                    | 0                                | 22                                          | 263239938                             | POINT (-122.90787 46.9461)              | PUGET SOUND ENERGY INC                         | 53067010910                         |
+| WAUUPBFF4J                 | Yakima                        | Wapato                      | WA                           | 98951                              | 2018                              | AUDI                        | A3                           | Plug-in Hybrid Electric Vehicle (PHEV)       | Not eligible due to low battery range              | 16                                    | 0                                | 15                                          | 318160860                             | POINT (-120.42083 46.44779)             | PACIFICORP                                     | 53077940008                         |
+| 1N4AZ0CP0F                 | King                          | Seattle                     | WA                           | 98125                              | 2015                              | NISSAN                      | LEAF                         | Battery Electric Vehicle (BEV)               | Clean Alternative Fuel Vehicle Eligible            | 84                                    | 0                                | 46                                          | 184963586                             | POINT (-122.30253 47.72656)             | CITY OF SEATTLE - (WA)|CITY OF TACOMA - (WA)   | 53033000700                         |
+| WA1VAAGE5K                 | King                          | Kent                        | WA                           | 98031                              | 2019                              | AUDI                        | E-TRON                       | Battery Electric Vehicle (BEV)               | Clean Alternative Fuel Vehicle Eligible            | 204                                   | 0                                | 11                                          | 259426821                             | POINT (-122.17743 47.41185)             | PUGET SOUND ENERGY INC||CITY OF TACOMA - (WA)  | 53033029306                         |
+| 7SAXCAE57N                 | Snohomish                     | Bothell                     | WA                           | 98021                              | 2022                              | TESLA                       | MODEL X                      | Battery Electric Vehicle (BEV)               | Eligibility unknown as battery range has not been researched | 0                                     | 0                                | 1                                           | 208182236                             | POINT (-122.18384 47.8031)              | PUGET SOUND ENERGY INC                         | 53061051922                         |
+| KNDJP3AEXG                 | Snohomish                     | Lynnwood                    | WA                           | 98037                              | 2016                              | KIA                         | SOUL                         | Battery Electric Vehicle (BEV)               | Clean Alternative Fuel Vehicle Eligible            | 93                                    | 31950                            | 21                                          | 209171889                             | POINT (-122.27734 47.83785)             | PUGET SOUND ENERGY INC                         | 53061051928                         |
+| 1N4AZ1CP7K                 | Snohomish                     | Edmonds                     | WA                           | 98026                              | 2019                              | NISSAN                      | LEAF                         | Battery Electric Vehicle (BEV)               | Clean Alternative Fuel Vehicle Eligible            | 150                                   | 0                                | 32                                          | 478448624                             | POINT (-122.31768 47.87166)             | PUGET SOUND ENERGY INC                         | 53061050900                         |
+| KNDCC3LG4L                 | Snohomish                     | Brier                       | WA                           | 98036                              | 2020                              | KIA                         | NIRO                         | Battery Electric Vehicle (BEV)               | Clean Alternative Fuel Vehicle Eligible            | 239                                   | 0                                | 1                                           | 281365724                             | POINT (-122.29245 47.82557)             | PUGET SOUND ENERGY INC                         | 53061051914                         |
+| KM8JFDD27S                 | Kitsap                        | Bremerton                   | WA                           | 98311                              | 2025                              | HYUNDAI                     | TUCSON                       | Plug-in Hybrid Electric Vehicle (PHEV)       | Clean Alternative Fuel Vehicle Eligible            | 32                                    | 0                                | 23                                          | 281377456                             | POINT (-122.60915 47.62631)             | PUGET SOUND ENERGY INC                         | 53035091600                         |
+| 1C4JJXR6XM                 | Sauk                          | Spring Green                | WI                           | 53588                              | 2021                              | JEEP                        | WRANGLER                     | Plug-in Hybrid Electric Vehicle (PHEV)       | Not eligible due to low battery range              | 21                                    | 0                                |                                             | 182273605                             | POINT (-90.06403 43.17838)              | NON WASHINGTON STATE ELECTRIC UTILITY          | 55111000800                         |
++----------------------------+-------------------------------+-----------------------------+------------------------------+------------------------------------+-----------------------------------+-----------------------------+------------------------------+----------------------------------------------+----------------------------------------------------+---------------------------------------+----------------------------------+---------------------------------------------+---------------------------------------+-----------------------------------------+------------------------------------------------+-------------------------------------+
+10 rows selected (0.48 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///>
+
+```
