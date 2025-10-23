@@ -1,0 +1,116 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres_hive
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: metastore_db
+      POSTGRES_USER: hiveuser
+      POSTGRES_PASSWORD: hivepassword
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - data_lake_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hiveuser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  hive-metastore:
+    image: apache/hive:4.0.0
+    platform: linux/amd64
+    container_name: hive_metastore
+    ports:
+      - "9083:9083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SERVICE_NAME: metastore
+      DB_DRIVER: postgres
+      SERVICE_OPTS: >
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/metastore_db
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionUserName=hiveuser
+        -Djavax.jdo.option.ConnectionPassword=hivepassword
+        -Dhive.metastore.uris=thrift://hive-metastore:9083
+        -Dhive.metastore.warehouse.dir=s3a://warehouse/
+        -Dfs.s3a.endpoint=http://minoproxy:9999
+        -Dfs.s3a.access.key=minioadmin
+        -Dfs.s3a.secret.key=minioadmin
+        -Dfs.s3a.path.style.access=true
+        -Dfs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
+    volumes:
+      - /opt/hive/conf/hive-site.xml:/opt/hive/conf/hive-site.xml
+      - /opt/hive/conf/core-site.xml:/opt/hive/conf/core-site.xml
+      - /opt/hive/jars/postgresql-42.7.3.jar:/opt/hive/lib/postgresql-42.7.3.jar
+      - /opt/hive/jars/hadoop-aws-3.3.4.jar:/opt/hive/lib/hadoop-aws-3.3.4.jar
+      - /opt/hive/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/hive/lib/aws-java-sdk-bundle-1.12.367.jar
+      - /opt/hive/hive_home:/home/hive
+    networks:
+      - data_lake_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9083 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+
+  hive-server2:
+    image: apache/hive:4.0.0
+    platform: linux/amd64
+    container_name: hive_server2
+    ports:
+      - "10000:10000"
+      - "10002:10002"
+    depends_on:
+      postgres:
+        condition: service_healthy      
+    environment:
+      SERVICE_NAME: hiveserver2
+      DB_DRIVER: postgres
+      SERVICE_OPTS: >
+        -Djavax.jdo.option.ConnectionURL=jdbc:postgresql://postgres:5432/metastore_db
+        -Djavax.jdo.option.ConnectionDriverName=org.postgresql.Driver
+        -Djavax.jdo.option.ConnectionUserName=hiveuser
+        -Djavax.jdo.option.ConnectionPassword=hivepassword
+        -Dhive.metastore.uris=thrift://hive-metastore:9083
+        -Dhive.metastore.warehouse.dir=s3a://warehouse/
+        -Dfs.s3a.endpoint=http://minoproxy:9999
+        -Dfs.s3a.access.key=minioadmin
+        -Dfs.s3a.secret.key=minioadmin
+        -Dfs.s3a.path.style.access=true
+        -Dfs.s3a.impl=org.apache.hadoop.fs.s3a.S3AFileSystem
+    volumes:
+      - /opt/hive/conf/hive-site.xml:/opt/hive/conf/hive-site.xml
+      - /opt/hive/conf/core-site.xml:/opt/hive/conf/core-site.xml
+      - /opt/hive/jars/postgresql-42.7.3.jar:/opt/hive/lib/postgresql-42.7.3.jar
+      - /opt/hive/jars/hadoop-aws-3.3.4.jar:/opt/hive/lib/hadoop-aws-3.3.4.jar
+      - /opt/hive/jars/aws-java-sdk-bundle-1.12.367.jar:/opt/hive/lib/aws-java-sdk-bundle-1.12.367.jar
+      - /opt/hive/hive_home:/home/hive
+    networks:
+      - data_lake_net
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z localhost 10000 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 180s
+
+
+
+networks:
+  data_lake_net:
+    driver: bridge
+    name: hive_minio_net
+
+volumes:
+  postgres_data:
+    name: hive_postgres_data
