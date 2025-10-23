@@ -726,4 +726,41 @@ No Stats for minio_test@cars_info_bucket_data, Columns: legislative_district, el
 0: jdbc:hive2:///>
 0: jdbc:hive2:///>
 
+# Now you can run some queries like below
+
+0: jdbc:hive2:///>
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> select count(*) from cars_info_bucket_data;
+25/10/23 07:10:56 [HiveServer2-Background-Pool: Thread-96]: WARN ql.Driver: Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. tez) or using Hive 1.X releases.
+Query ID = hive_20251023071056_8001af9c-2626-4808-a791-95ec9cf5b5fd
+Total jobs = 1
+Launching Job 1 out of 1
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+25/10/23 07:10:56 [HiveServer2-Background-Pool: Thread-96]: WARN impl.MetricsSystemImpl: JobTracker metrics system already initialized!
+25/10/23 07:10:56 [HiveServer2-Background-Pool: Thread-96]: WARN mapreduce.JobResourceUploader: Hadoop command-line option parsing not performed. Implement the Tool interface and execute your application with ToolRunner to remedy this.
+Job running in-process (local Hadoop)
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. tez) or using Hive 1.X releases.
+25/10/23 07:10:58 [HiveServer2-Background-Pool: Thread-96]: WARN mapreduce.Counters: Group org.apache.hadoop.mapred.Task$Counter is deprecated. Use org.apache.hadoop.mapreduce.TaskCounter instead
+2025-10-23 07:10:58,576 Stage-1 map = 0%,  reduce = 0%
+25/10/23 07:11:01 [pool-10-thread-1]: WARN impl.MetricsSystemImpl: JobTracker metrics system already initialized!
+2025-10-23 07:11:02,629 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 5.85 sec
+MapReduce Total cumulative CPU time: 5 seconds 850 msec
+Ended Job = job_local18412293_0001
+MapReduce Jobs Launched:
+Stage-Stage-1:  Cumulative CPU: 5.85 sec   HDFS Read: 0 HDFS Write: 0 SUCCESS
+Total MapReduce CPU Time Spent: 5 seconds 850 msec
++---------+
+|   _c0   |
++---------+
+| 264629  |
++---------+
+1 row selected (6.828 seconds)
+0: jdbc:hive2:///>
+
 ```
