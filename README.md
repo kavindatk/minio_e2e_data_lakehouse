@@ -322,6 +322,325 @@ hadoop@node01:/opt/hive$
 <br/><br/>
 
 
-## ⚙️ Step 04 – Testing Phase
+## 🧪 Step 04 - Testing Phase
+<br/>
+Now it’s time for testing.
+The following steps show the testing phase of the cluster. In this stage, I’ll demonstrate how to:
+<br/><br/>
+1. Create managed and external tables<br/>
+2. Upload files and view data using Beeline<br/>
+3. Insert data into tables using Beeline<br/>
+<br/><br/>
+Before we begin, there are a few initial configurations required — specifically, creating S3 buckets and setting the correct permissions.
+The steps below show the complete process for these configurations.
+<br/>
 
 
+```bash
+# Create warehouse bucket for store Hive data
+
+hadoop@node01:/opt/hive/conf$ mc mb myminio/warehouse
+Bucket created successfully `myminio/warehouse`.
+hadoop@node01:/opt/hive/conf$ mc anonymous set public myminio/warehouse
+Access permission for `myminio/warehouse` is set to `public`
+hadoop@node01:/opt/hive/conf$
+
+# Create tmpbucket bucket for store Hive tmp data
+
+hadoop@node01:/opt/hive/conf$ mc mb myminio/tmpbucket
+Bucket created successfully `myminio/tmpbucket`.
+hadoop@node01:/opt/hive/conf$ mc anonymous set public myminio/tmpbucket
+Access permission for `myminio/tmpbucket` is set to `public`
+hadoop@node01:/opt/hive/conf$
+
+```
+<br/><br/>
+### Beeline Testing
+<br/><br/>
+```bash
+# Login docker containner using terminal and access the beeline
+# docker exec -it hive_server2 beeline -u "jdbc:hive2:///"  <- this can use for direct login 
+
+hadoop@node01:/opt/hive$
+hadoop@node01:/opt/hive$ docker exec -it hive_server2 bash
+hive@79777dae2ffa:/opt/hive$ beeline -u "jdbc:hive2:///"
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.18.0.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/hadoop/share/hadoop/common/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/opt/hive/lib/log4j-slf4j-impl-2.18.0.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/opt/hadoop/share/hadoop/common/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.apache.logging.slf4j.Log4jLoggerFactory]
+Connecting to jdbc:hive2:///
+25/10/23 06:44:16 [main]: WARN conf.HiveConf: HiveConf of name hive.default.table.type does not exist
+Hive Session ID = 24ea6554-0b27-4e50-a972-8b7ce8bdaef3
+25/10/23 06:44:20 [main]: WARN exec.FunctionRegistry: UDF Class org.apache.hive.org.apache.datasketches.hive.cpc.UnionSketchUDF does not have description. Please annotate the class with the org.apache.hadoop.hive.ql.exec.Description annotation and provide the description of the function.
+25/10/23 06:44:20 [main]: WARN exec.FunctionRegistry: UDF Class org.apache.hive.org.apache.datasketches.hive.hll.UnionSketchUDF does not have description. Please annotate the class with the org.apache.hadoop.hive.ql.exec.Description annotation and provide the description of the function.
+25/10/23 06:44:20 [main]: WARN exec.FunctionRegistry: UDF Class org.apache.hive.org.apache.datasketches.hive.theta.IntersectSketchUDF does not have description. Please annotate the class with the org.apache.hadoop.hive.ql.exec.Description annotation and provide the description of the function.
+25/10/23 06:44:20 [main]: WARN exec.FunctionRegistry: UDF Class org.apache.hive.org.apache.datasketches.hive.theta.EstimateSketchUDF does not have description. Please annotate the class with the org.apache.hadoop.hive.ql.exec.Description annotation and provide the description of the function.
+25/10/23 06:44:20 [main]: WARN exec.FunctionRegistry: UDF Class org.apache.hive.org.apache.datasketches.hive.theta.ExcludeSketchUDF does not have description. Please annotate the class with the org.apache.hadoop.hive.ql.exec.Description annotation and provide the description of the function.
+25/10/23 06:44:20 [main]: WARN exec.FunctionRegistry: UDF Class org.apache.hive.org.apache.datasketches.hive.theta.UnionSketchUDF does not have description. Please annotate the class with the org.apache.hadoop.hive.ql.exec.Description annotation and provide the description of the function.
+25/10/23 06:44:20 [main]: WARN exec.FunctionRegistry: UDF Class org.apache.hive.org.apache.datasketches.hive.tuple.ArrayOfDoublesSketchToValuesUDTF does not have description. Please annotate the class with the org.apache.hadoop.hive.ql.exec.Description annotation and provide the description of the function.
+25/10/23 06:44:21 [main]: WARN session.SessionState: Configuration hive.reloadable.aux.jars.path not specified
+Connected to: Apache Hive (version 4.0.0)
+Driver: Hive JDBC (version 4.0.0)
+Transaction isolation: TRANSACTION_REPEATABLE_READ
+Beeline version 4.0.0 by Apache Hive
+0: jdbc:hive2:///> show databases;
+25/10/23 06:44:26 [Metastore-RuntimeStats-Loader-1]: WARN conf.HiveConf: HiveConf of name hive.default.table.type does not exist
++----------------+
+| database_name  |
++----------------+
+| default        |
++----------------+
+1 row selected (2.385 seconds)
+0: jdbc:hive2:///>
+
+```
+<br/><br/>
+
+
+```bash
+# Create some database/tables and load data to tables 
+
+0: jdbc:hive2:///>
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> show databases;
+25/10/23 06:48:14 [Metastore-RuntimeStats-Loader-1]: WARN conf.HiveConf: HiveConf of name hive.default.table.type does not exist
++----------------+
+| database_name  |
++----------------+
+| default        |
++----------------+
+1 row selected (2.375 seconds)
+0: jdbc:hive2:///> create database minio_test;
+No rows affected (2.506 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> show databases;
++----------------+
+| database_name  |
++----------------+
+| default        |
+| minio_test     |
++----------------+
+2 rows selected (0.046 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> use minio_test;
+No rows affected (0.093 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> CREATE TABLE cars_managed_table (
+. . . . . . . . .>   id INT,
+. . . . . . . . .>   make STRING,
+. . . . . . . . .>   model STRING,
+. . . . . . . . .>   year INT
+. . . . . . . . .> );
+No rows affected (1.02 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> INSERT INTO cars_managed_table VALUES
+. . . . . . . . .>   (1, 'Tesla', 'Model S', 2022),
+. . . . . . . . .>   (2, 'Nissan', 'Leaf', 2021),
+. . . . . . . . .>   (3, 'Chevrolet', 'Bolt', 2020);
+25/10/23 06:50:00 [HiveServer2-Background-Pool: Thread-58]: WARN ql.Driver: Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. tez) or using Hive 1.X releases.
+Query ID = hive_20251023064957_299777a0-e0e1-400e-97c7-5a6473776b44
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+25/10/23 06:50:00 [HiveServer2-Background-Pool: Thread-58]: WARN impl.MetricsSystemImpl: JobTracker metrics system already initialized!
+25/10/23 06:50:00 [HiveServer2-Background-Pool: Thread-58]: WARN mapreduce.JobResourceUploader: Hadoop command-line option parsing not performed. Implement the Tool interface and execute your application with ToolRunner to remedy this.
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. tez) or using Hive 1.X releases.
+Job running in-process (local Hadoop)
+25/10/23 06:50:01 [LocalJobRunner Map Task Executor #0]: WARN objectinspector.StandardStructObjectInspector: Trying to access 3 fields inside a list of 2 elements: [3, 20.0]
+25/10/23 06:50:01 [LocalJobRunner Map Task Executor #0]: WARN objectinspector.StandardStructObjectInspector: ignoring similar errors.
+25/10/23 06:50:01 [pool-9-thread-1]: WARN impl.MetricsSystemImpl: JobTracker metrics system already initialized!
+2025-10-23 06:50:01,963 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 1.41 sec
+MapReduce Total cumulative CPU time: 1 seconds 410 msec
+Ended Job = job_local294063186_0001
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Loading data to table minio_test.cars_managed_table
+MapReduce Jobs Launched:
+Stage-Stage-1:  Cumulative CPU: 1.41 sec   HDFS Read: 0 HDFS Write: 0 SUCCESS
+Total MapReduce CPU Time Spent: 1 seconds 410 msec
+3 rows affected (5.51 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> show tables;
++---------------------+
+|      tab_name       |
++---------------------+
+| cars_managed_table  |
++---------------------+
+1 row selected (0.116 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> select * from cars_managed_table;
++------------------------+--------------------------+---------------------------+--------------------------+
+| cars_managed_table.id  | cars_managed_table.make  | cars_managed_table.model  | cars_managed_table.year  |
++------------------------+--------------------------+---------------------------+--------------------------+
+| 1                      | Tesla                    | Model S                   | 2022                     |
+| 2                      | Nissan                   | Leaf                      | 2021                     |
+| 3                      | Chevrolet                | Bolt                      | 2020                     |
++------------------------+--------------------------+---------------------------+--------------------------+
+3 rows selected (0.631 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///>
+0: jdbc:hive2:///>
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> CREATE EXTERNAL TABLE cars_external_table (
+. . . . . . . . .>   id INT,
+. . . . . . . . .>   make STRING,
+. . . . . . . . .>   model STRING,
+. . . . . . . . .>   year INT
+. . . . . . . . .> );
+No rows affected (0.192 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> INSERT INTO cars_external_table VALUES
+. . . . . . . . .>   (1, 'Tesla', 'Model S', 2022),
+. . . . . . . . .>   (2, 'Nissan', 'Leaf', 2021),
+. . . . . . . . .>   (3, 'Chevrolet', 'Bolt', 2020);
+25/10/23 06:51:11 [HiveServer2-Background-Pool: Thread-122]: WARN ql.Driver: Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. tez) or using Hive 1.X releases.
+Query ID = hive_20251023065111_e47f81de-e315-4340-908b-a8da680b5c57
+Total jobs = 3
+Launching Job 1 out of 3
+Number of reduce tasks determined at compile time: 1
+In order to change the average load for a reducer (in bytes):
+  set hive.exec.reducers.bytes.per.reducer=<number>
+In order to limit the maximum number of reducers:
+  set hive.exec.reducers.max=<number>
+In order to set a constant number of reducers:
+  set mapreduce.job.reduces=<number>
+25/10/23 06:51:11 [HiveServer2-Background-Pool: Thread-122]: WARN impl.MetricsSystemImpl: JobTracker metrics system already initialized!
+25/10/23 06:51:12 [HiveServer2-Background-Pool: Thread-122]: WARN impl.MetricsSystemImpl: JobTracker metrics system already initialized!
+25/10/23 06:51:12 [HiveServer2-Background-Pool: Thread-122]: WARN mapreduce.JobResourceUploader: Hadoop command-line option parsing not performed. Implement the Tool interface and execute your application with ToolRunner to remedy this.
+Job running in-process (local Hadoop)
+25/10/23 06:51:12 [pool-18-thread-1]: WARN impl.MetricsSystemImpl: JobTracker metrics system already initialized!
+WARN  : Hive-on-MR is deprecated in Hive 2 and may not be available in the future versions. Consider using a different execution engine (i.e. tez) or using Hive 1.X releases.
+2025-10-23 06:51:13,431 Stage-1 map = 100%,  reduce = 100%, Cumulative CPU 0.67 sec
+MapReduce Total cumulative CPU time: 670 msec
+Ended Job = job_local1108689548_0002
+Stage-4 is selected by condition resolver.
+Stage-3 is filtered out by condition resolver.
+Stage-5 is filtered out by condition resolver.
+Loading data to table minio_test.cars_external_table
+25/10/23 06:51:13 [HiveServer2-Background-Pool: Thread-122]: WARN metadata.Hive: Cannot get a table snapshot for cars_external_table
+25/10/23 06:51:14 [HiveServer2-Background-Pool: Thread-122]: WARN metadata.Hive: Cannot get a table snapshot for cars_external_table
+MapReduce Jobs Launched:
+Stage-Stage-1:  Cumulative CPU: 0.67 sec   HDFS Read: 0 HDFS Write: 0 SUCCESS
+Total MapReduce CPU Time Spent: 670 msec
+3 rows affected (2.515 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> show tables;
++----------------------+
+|       tab_name       |
++----------------------+
+| cars_external_table  |
+| cars_managed_table   |
++----------------------+
+2 rows selected (0.039 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> select * from cars_external_table;
+25/10/23 06:51:24 [5fd1b7bd-0662-4dd7-8eff-da012ad7c023 main]: WARN optimizer.SimpleFetchOptimizer: Table minio_test@cars_external_table is external table, falling back to filesystem scan.
++-------------------------+---------------------------+----------------------------+---------------------------+
+| cars_external_table.id  | cars_external_table.make  | cars_external_table.model  | cars_external_table.year  |
++-------------------------+---------------------------+----------------------------+---------------------------+
+| 1                       | Tesla                     | Model S                    | 2022                      |
+| 2                       | Nissan                    | Leaf                       | 2021                      |
+| 3                       | Chevrolet                 | Bolt                       | 2020                      |
++-------------------------+---------------------------+----------------------------+---------------------------+
+3 rows selected (0.326 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///>
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> describe formatted cars_external_table;
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+|           col_name            |                     data_type                      |                      comment                       |
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+| id                            | int                                                |                                                    |
+| make                          | string                                             |                                                    |
+| model                         | string                                             |                                                    |
+| year                          | int                                                |                                                    |
+|                               | NULL                                               | NULL                                               |
+| # Detailed Table Information  | NULL                                               | NULL                                               |
+| Database:                     | minio_test                                         | NULL                                               |
+| OwnerType:                    | USER                                               | NULL                                               |
+| Owner:                        | hive                                               | NULL                                               |
+| CreateTime:                   | Thu Oct 23 06:51:04 UTC 2025                       | NULL                                               |
+| LastAccessTime:               | UNKNOWN                                            | NULL                                               |
+| Retention:                    | 0                                                  | NULL                                               |
+| Location:                     | s3a://warehouse/tablespace/external_tables/minio_test.db/cars_external_table | NULL                                               |
+| Table Type:                   | EXTERNAL_TABLE                                     | NULL                                               |
+| Table Parameters:             | NULL                                               | NULL                                               |
+|                               | COLUMN_STATS_ACCURATE                              | {\"BASIC_STATS\":\"true\",\"COLUMN_STATS\":{\"id\":\"true\",\"make\":\"true\",\"model\":\"true\",\"year\":\"true\"}} |
+|                               | EXTERNAL                                           | TRUE                                               |
+|                               | bucketing_version                                  | 2                                                  |
+|                               | numFiles                                           | 1                                                  |
+|                               | numRows                                            | 3                                                  |
+|                               | rawDataSize                                        | 59                                                 |
+|                               | totalSize                                          | 62                                                 |
+|                               | transient_lastDdlTime                              | 1761202274                                         |
+|                               | NULL                                               | NULL                                               |
+| # Storage Information         | NULL                                               | NULL                                               |
+| SerDe Library:                | org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe | NULL                                               |
+| InputFormat:                  | org.apache.hadoop.mapred.TextInputFormat           | NULL                                               |
+| OutputFormat:                 | org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat | NULL                                               |
+| Compressed:                   | No                                                 | NULL                                               |
+| Num Buckets:                  | -1                                                 | NULL                                               |
+| Bucket Columns:               | []                                                 | NULL                                               |
+| Sort Columns:                 | []                                                 | NULL                                               |
+| Storage Desc Params:          | NULL                                               | NULL                                               |
+|                               | serialization.format                               | 1                                                  |
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+34 rows selected (0.122 seconds)
+0: jdbc:hive2:///>
+0: jdbc:hive2:///> describe formatted cars_managed_table;
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+|           col_name            |                     data_type                      |                      comment                       |
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+| id                            | int                                                |                                                    |
+| make                          | string                                             |                                                    |
+| model                         | string                                             |                                                    |
+| year                          | int                                                |                                                    |
+|                               | NULL                                               | NULL                                               |
+| # Detailed Table Information  | NULL                                               | NULL                                               |
+| Database:                     | minio_test                                         | NULL                                               |
+| OwnerType:                    | USER                                               | NULL                                               |
+| Owner:                        | hive                                               | NULL                                               |
+| CreateTime:                   | Thu Oct 23 06:49:50 UTC 2025                       | NULL                                               |
+| LastAccessTime:               | UNKNOWN                                            | NULL                                               |
+| Retention:                    | 0                                                  | NULL                                               |
+| Location:                     | s3a://warehouse/tablespace/managed_tables/minio_test.db/cars_managed_table | NULL                                               |
+| Table Type:                   | MANAGED_TABLE                                      | NULL                                               |
+| Table Parameters:             | NULL                                               | NULL                                               |
+|                               | COLUMN_STATS_ACCURATE                              | {\"BASIC_STATS\":\"true\",\"COLUMN_STATS\":{\"id\":\"true\",\"make\":\"true\",\"model\":\"true\",\"year\":\"true\"}} |
+|                               | bucketing_version                                  | 2                                                  |
+|                               | numFiles                                           | 1                                                  |
+|                               | numRows                                            | 3                                                  |
+|                               | rawDataSize                                        | 59                                                 |
+|                               | totalSize                                          | 62                                                 |
+|                               | transactional                                      | true                                               |
+|                               | transactional_properties                           | insert_only                                        |
+|                               | transient_lastDdlTime                              | 1761202202                                         |
+|                               | NULL                                               | NULL                                               |
+| # Storage Information         | NULL                                               | NULL                                               |
+| SerDe Library:                | org.apache.hadoop.hive.serde2.lazy.LazySimpleSerDe | NULL                                               |
+| InputFormat:                  | org.apache.hadoop.mapred.TextInputFormat           | NULL                                               |
+| OutputFormat:                 | org.apache.hadoop.hive.ql.io.HiveIgnoreKeyTextOutputFormat | NULL                                               |
+| Compressed:                   | No                                                 | NULL                                               |
+| Num Buckets:                  | -1                                                 | NULL                                               |
+| Bucket Columns:               | []                                                 | NULL                                               |
+| Sort Columns:                 | []                                                 | NULL                                               |
+| Storage Desc Params:          | NULL                                               | NULL                                               |
+|                               | serialization.format                               | 1                                                  |
++-------------------------------+----------------------------------------------------+----------------------------------------------------+
+35 rows selected (0.104 seconds)
+0: jdbc:hive2:///>
+
+```
